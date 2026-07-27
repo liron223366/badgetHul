@@ -2,12 +2,15 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="לוח הוצאות">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a1628">
 <meta name="description" content="לוח הוצאות בחו״ל - ניהול תקציב נסיעות">
+<meta name="format-detection" content="telephone=no">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a1628' width='100' height='100'/><text x='50' y='55' font-size='40' fill='white' text-anchor='middle'>₪</text></svg>">
 <title>לוח הוצאות בחו״ל</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -239,18 +242,33 @@
     padding:9px 18px;border-radius:10px;cursor:pointer;transition:all 0.2s ease;
   }
   .currency-add .btn-secondary:hover{color:var(--accent);border-color:var(--accent-dim);transform:translateY(-1px);}
+  #currencyMsg{font-size:12px;margin-top:8px;display:block;}
+
+  .currency-add-top{display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap;padding:12px 16px;background:linear-gradient(145deg, var(--panel2), var(--panel));border-radius:12px;border:1px solid var(--border);}
+  .currency-add-top input{width:70px;text-transform:uppercase;font-size:13px;padding:8px 10px;}
+  .btn-secondary-small{
+    background:linear-gradient(145deg, var(--accent), var(--accent-2));border:none;color:#ffffff;
+    padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;
+    transition:all 0.2s ease;
+  }
+  .btn-secondary-small:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(10,22,40,0.2);}
 
   /* breakdown */
   .breakdown-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;}
   @media (max-width:760px){.breakdown-grid{grid-template-columns:1fr;}}
   @media (max-width:600px){
-    .app{padding:20px 16px 60px;}
-    .app-header{flex-direction:column;align-items:flex-start;}
+    .app{padding:16px 12px 80px;}
+    .app-header{flex-direction:column;align-items:flex-start;gap:12px;}
     .brand-mark{width:50px;height:50px;font-size:24px;}
-    .stat-strip{grid-template-columns:1fr 1fr;}
-    .ledger-item{grid-template-columns:50px 1fr auto auto 30px;gap:8px;font-size:12px;}
-    .country-header{flex-direction:column;align-items:flex-start;gap:10px;}
+    .stat-strip{grid-template-columns:1fr 1fr;gap:10px;}
+    .stat-card{padding:16px;}
+    .stat-value{font-size:20px;}
+    .ledger-item{grid-template-columns:50px 1fr auto auto 30px;gap:8px;font-size:12px;padding:12px 10px;}
+    .country-header{flex-direction:column;align-items:flex-start;gap:10px;padding:12px 14px;}
     .country-stats{flex-direction:column;gap:5px;}
+    .form-grid input, .form-grid select{padding:14px 16px;font-size:16px;}
+    .form-grid label{font-size:14px;margin-bottom:6px;}
+    .btn-primary{padding:14px 24px;font-size:16px;}
   }
   .breakdown-col h3{font-size:12px;color:var(--text-faint);margin:0 0 14px;font-weight:500;letter-spacing:0.5px;text-transform:uppercase;}
   .bar-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:13px;}
@@ -341,6 +359,159 @@
   }
   .country-content .ledger-item:first-child{border-top:none;}
   .country-content .ledger-item{border-top:1px solid var(--border);}
+
+  /* category sections within countries */
+  .category-section{
+    margin-bottom:12px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:linear-gradient(145deg, var(--panel), var(--bg-2));
+    overflow:hidden;
+  }
+  .category-header{
+    background:linear-gradient(145deg, var(--panel2), var(--panel));
+    padding:10px 14px;
+    display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px solid var(--border);
+    cursor:pointer;
+    transition:background 0.2s ease;
+  }
+  .category-header:hover{background:linear-gradient(145deg, var(--panel3), var(--panel2));}
+  .category-name{
+    font-size:13px;font-weight:600;color:var(--text-dim);
+    display:flex;align-items:center;gap:8px;
+  }
+  .category-icon{
+    width:20px;height:20px;border-radius:4px;
+    background:linear-gradient(135deg, var(--teal), var(--teal-dim));
+    display:flex;align-items:center;justify-content:center;
+    font-size:10px;color:#ffffff;font-weight:700;
+  }
+  .category-stats{
+    display:flex;gap:12px;font-size:12px;
+  }
+  .cat-count{color:var(--text-faint);}
+  .cat-total{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--text);font-weight:600;direction:ltr;
+  }
+  .category-content{
+    padding:0;
+    max-height:2000px;
+    overflow:hidden;
+    transition:max-height 0.3s ease, padding 0.3s ease;
+  }
+  .category-content.collapsed{
+    max-height:0;
+  }
+
+  /* Navigation */
+  .nav-bar{
+    display:flex;gap:8px;margin-bottom:24px;padding:12px 16px;
+    background:linear-gradient(145deg, var(--panel2), var(--panel));
+    border:1px solid var(--border);border-radius:12px;
+    overflow-x:auto;
+  }
+  .nav-btn{
+    flex:1;min-width:80px;padding:10px 16px;
+    background:transparent;border:1px solid transparent;
+    color:var(--text-dim);font-size:13px;font-weight:500;
+    border-radius:10px;cursor:pointer;transition:all 0.2s ease;
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+  }
+  .nav-btn:hover{
+    background:linear-gradient(145deg, var(--panel3), var(--panel2));
+    color:var(--text);
+  }
+  .nav-btn.active{
+    background:linear-gradient(145deg, var(--accent), var(--accent-2));
+    color:#ffffff;border-color:var(--accent-dim);
+  }
+  .nav-btn svg{opacity:0.7;}
+  .nav-btn.active svg{opacity:1;}
+
+  /* Pages */
+  .page{display:none;}
+  .page.active{display:block;}
+
+  @media (max-width:600px){
+    .nav-bar{padding:10px 12px;gap:6px;position:fixed;bottom:0;left:0;right:0;margin:0;border-radius:0;border-top:1px solid var(--border);background:linear-gradient(145deg, var(--panel2), var(--panel));z-index:100;box-shadow:0 -4px 20px rgba(0,0,0,0.1);}
+    .nav-btn{min-width:60px;padding:10px 12px;font-size:12px;gap:4px;}
+    .nav-btn svg{width:18px;height:18px;}
+  }
+
+  /* Summary page */
+  .summary-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;
+  }
+  @media (max-width:600px){.summary-grid{grid-template-columns:1fr;}}
+  @media (max-width:600px){
+    .summary-card{padding:16px;}
+    .summary-value{font-size:20px;}
+    .summary-row{padding:12px 14px;}
+  }
+  .summary-card{
+    background:linear-gradient(145deg, var(--panel2), var(--panel));
+    border:1px solid var(--border);border-radius:12px;padding:20px;
+    text-align:center;
+  }
+  .summary-card h3{font-size:12px;color:var(--text-faint);margin:0 0 8px;font-weight:500;}
+  .summary-value{
+    font-size:24px;font-weight:700;color:var(--text);
+    font-family:'JetBrains Mono',monospace;direction:ltr;
+  }
+  .summary-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 16px;background:linear-gradient(145deg, var(--panel), var(--bg-2));
+    border-radius:10px;border:1px solid var(--border);
+  }
+  .summary-label{font-size:14px;color:var(--text-dim);font-weight:500;}
+  .summary-total{
+    font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--text);direction:ltr;font-size:15px;
+  }
+
+  .summary-list{
+    display:flex;flex-direction:column;gap:10px;
+  }
+
+  .summary-section{
+    background:linear-gradient(145deg, var(--panel2), var(--panel));
+    border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;
+  }
+  .summary-section h3{
+    font-size:14px;color:var(--text-dim);margin:0 0 16px;font-weight:600;
+  }
+
+  /* Countries list */
+  .country-row{
+    display:flex;align-items:center;gap:12px;padding:16px;
+    background:linear-gradient(145deg, var(--panel), var(--bg-2));
+    border:1px solid var(--border);border-radius:12px;margin-bottom:12px;
+  }
+  .country-row-name{
+    flex:1;font-size:15px;font-weight:600;color:var(--text);
+  }
+  .country-row-dates{
+    display:flex;gap:8px;align-items:center;flex:1;
+  }
+  .country-row-dates input{
+    padding:8px 12px;border:1px solid var(--border);border-radius:8px;
+    background:var(--bg-2);color:var(--text);font-size:13px;
+  }
+  .country-row-days{
+    font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--teal);
+    font-size:14px;min-width:80px;text-align:center;
+  }
+  .country-row-save{
+    background:linear-gradient(145deg, var(--accent), var(--accent-2));
+    color:#ffffff;border:none;padding:8px 16px;border-radius:8px;
+    cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s ease;
+  }
+  .country-row-save:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(10,22,40,0.2);}
+  @media (max-width:600px){
+    .country-row{flex-direction:column;align-items:stretch;gap:10px;}
+    .country-row-dates{flex-direction:column;align-items:stretch;}
+  }
 </style>
 </head>
 <body>
@@ -364,110 +535,136 @@
     </div>
   </div>
 
-  <div class="stat-strip">
-    <div class="stat-card">
-      <div class="stat-label">מספר הוצאות</div>
-      <div class="stat-value" id="statCount">0</div>
+  <!-- Navigation -->
+  <div class="nav-bar">
+    <button class="nav-btn active" data-page="dashboard">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      דשבורד
+    </button>
+    <button class="nav-btn" data-page="countries">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10  .15.3 15.3 0 0 1-4 10  .15.3 15.3 0 0 1-4-10  .15.3 15.3 0 0 1 4-10z"/></svg>
+      מדינות
+    </button>
+    <button class="nav-btn" data-page="add">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      הוספת הוצאה
+    </button>
+  </div>
+
+  <!-- Page: Dashboard (Combined with Summary) -->
+  <div id="page-dashboard" class="page active">
+    <div class="board">
+      <div class="board-top">
+        <span class="board-label">סה״כ הוצאות בחו״ל (מומר)</span>
+        <button class="refresh-btn" id="refreshRates">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg>
+          רענון שערים
+        </button>
+      </div>
+      <div style="display:flex;align-items:center;">
+        <span class="board-currency" id="totalCurrencyLabel">ILS</span>
+        <div class="flap-row" id="totalFlaps"></div>
+      </div>
+      <div class="rate-ticker" id="rateTicker"></div>
+      <div class="loading-note" id="rateStatus"></div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">הוצאה ממוצעת</div>
-      <div class="stat-value" id="statAvg">—</div>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <h3>סה״כ הוצאות</h3>
+        <div class="summary-value" id="summaryTotal">—</div>
+      </div>
+      <div class="summary-card">
+        <h3>מספר הוצאות</h3>
+        <div class="summary-value" id="summaryCount">0</div>
+      </div>
+      <div class="summary-card">
+        <h3>הוצאה ממוצעת</h3>
+        <div class="summary-value" id="summaryAvg">—</div>
+      </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">קטגוריה מובילה</div>
-      <div class="stat-value small" id="statTopCat">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">מדינה מובילה</div>
-      <div class="stat-value small" id="statTopCountry">—</div>
+
+    <div class="summary-section">
+      <h2>פילוח לפי קטגוריה</h2>
+      <div id="categoryChart"></div>
     </div>
   </div>
 
-  <div class="board">
-    <div class="board-top">
-      <span class="board-label">סה״כ הוצאות בחו״ל (מומר)</span>
-      <button class="refresh-btn" id="refreshRates">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg>
-        רענון שערים
-      </button>
+  <!-- Page: Countries -->
+  <div id="page-countries" class="page">
+    <div class="panel">
+      <h2>ניהול מדינות</h2>
+      <div id="countriesList"></div>
     </div>
-    <div style="display:flex;align-items:center;">
-      <span class="board-currency" id="totalCurrencyLabel">ILS</span>
-      <div class="flap-row" id="totalFlaps"></div>
-    </div>
-    <div class="rate-ticker" id="rateTicker"></div>
-    <div class="loading-note" id="rateStatus"></div>
-  </div>
-
-  <div class="panel">
-    <h2>הוספת הוצאה</h2>
-    <div class="form-grid">
-      <div>
-        <label>תאריך</label>
-        <input type="date" id="fDate">
-      </div>
-      <div>
-        <label>סכום</label>
-        <input type="number" id="fAmount" step="0.01" min="0" placeholder="0.00">
-      </div>
-      <div>
-        <label>מטבע</label>
-        <select id="fCurrency"></select>
-      </div>
-      <div>
-        <label>מדינה</label>
-        <input type="text" id="fCountry" list="countryList" placeholder="לדוגמה: תאילנד">
-        <datalist id="countryList"></datalist>
-      </div>
-      <div>
-        <label>קטגוריה</label>
-        <select id="fCategory">
-          <option value="מזון">מזון</option>
-          <option value="תחבורה">תחבורה</option>
-          <option value="לינה">לינה</option>
-          <option value="בילויים">בילויים</option>
-          <option value="קניות">קניות</option>
-          <option value="בריאות">בריאות</option>
-          <option value="אחר">אחר</option>
-        </select>
-      </div>
-      <div>
-        <label>הערה (אופציונלי)</label>
-        <input type="text" id="fNote" placeholder="לדוגמה: ארוחת ערב">
-      </div>
-      <div>
-        <label>שער ידני (אופציונלי - משאיר ריק לשער אוטומטי)</label>
-        <input type="number" id="fManualRate" step="0.0001" placeholder="3.06">
-      </div>
-    </div>
-    <div class="currency-add">
-      <label style="font-size:12px;color:var(--text-faint);">מטבע חדש לרשימה:</label>
-      <input type="text" id="newCurCode" maxlength="3" placeholder="USD">
-      <button class="btn-secondary" id="addCurBtn">הוסף מטבע</button>
-    </div>
-    <div class="add-row">
-      <span class="form-msg" id="formMsg"></span>
-      <button class="btn-primary" id="addExpenseBtn">הוסף הוצאה</button>
+    <div class="panel">
+      <h2>הוצאות לפי מדינה <span class="n" id="ledgerCount"></span></h2>
+      <div id="ledgerList"></div>
     </div>
   </div>
 
-  <div class="panel">
-    <h2>פילוח <span class="n">לפי קטגוריה, מדינה ומטבע</span></h2>
-    <div class="breakdown-grid">
-      <div class="breakdown-col"><h3>קטגוריה</h3><div id="categoryBreakdown"></div></div>
-      <div class="breakdown-col"><h3>מדינה</h3><div id="countryBreakdown"></div></div>
-      <div class="breakdown-col"><h3>מטבע</h3><div id="currencyBreakdown"></div></div>
+  <!-- Page: Add Expense -->
+  <div id="page-add" class="page">
+    <div class="panel">
+      <h2>הוספת הוצאה</h2>
+      <div class="form-grid">
+        <div>
+          <label>תאריך</label>
+          <input type="date" id="fDate">
+        </div>
+        <div>
+          <label>סכום</label>
+          <input type="number" id="fAmount" step="0.01" min="0" placeholder="0.00">
+        </div>
+        <div>
+          <label>מטבע</label>
+          <select id="fCurrency"></select>
+        </div>
+        <div>
+          <label>מדינה</label>
+          <input type="text" id="fCountry" list="countryList" placeholder="לדוגמה: תאילנד">
+          <datalist id="countryList"></datalist>
+        </div>
+        <div>
+          <label>קטגוריה</label>
+          <select id="fCategory">
+            <option value="מזון">מזון</option>
+            <option value="תחבורה">תחבורה</option>
+            <option value="לינה">לינה</option>
+            <option value="בילויים">בילויים</option>
+            <option value="קניות">קניות</option>
+            <option value="בריאות">בריאות</option>
+            <option value="אחר">אחר</option>
+          </select>
+        </div>
+        <div>
+          <label>הערה (אופציונלי)</label>
+          <input type="text" id="fNote" placeholder="לדוגמה: ארוחת ערב">
+        </div>
+        <div>
+          <label>שער ידני (אופציונלי - משאיר ריק לשער אוטומטי)</label>
+          <input type="number" id="fManualRate" step="0.0001" placeholder="3.06">
+        </div>
+      </div>
+      <div class="add-row">
+        <span class="form-msg" id="formMsg"></span>
+        <button class="btn-primary" id="addExpenseBtn">הוסף הוצאה</button>
+      </div>
     </div>
-  </div>
-
-  <div class="panel">
-    <h2>יומן הוצאות <span class="n" id="ledgerCount"></span></h2>
-    <div id="ledgerList"></div>
+    <div class="panel">
+      <h2>הוספת מטבע חדש</h2>
+      <div class="currency-add">
+        <label style="font-size:12px;color:var(--text-faint);">קוד מטבע (3 תווים):</label>
+        <input type="text" id="newCurCode" maxlength="3" placeholder="USD">
+        <button class="btn-secondary" id="addCurBtn">הוסף מטבע</button>
+      </div>
+      <span class="form-msg" id="currencyMsg"></span>
+    </div>
   </div>
 
   <div class="footer-note">
     השערים מתעדכנים אוטומטית מול שירות שערי חליפין חיצוני (שערים נוכחיים בלבד).<br>
-    כל הנתונים נשמרים בדפדפן שלך בלבד.
+    כל הנתונים נשמרים בדפדפן שלך בלבד - כל מכשיר שומר את הנתונים שלו בנפרד.<br>
+    ניתן לשתף את הקישור עם חברים - כל אחד יקבל את האפליקציה עם הנתונים שלו בלבד.
   </div>
 
 </div>
@@ -508,7 +705,8 @@ let state = {
   homeCurrency: "ILS",
   currencies: ["USD","EUR"],
   expenses: [],
-  tripName: ""
+  tripName: "",
+  countries: {} // Store country date ranges: { "תאילנד": { start: "2026-07-01", end: "2026-07-10" } }
 };
 let rateCache = {};
 
@@ -740,47 +938,6 @@ function renderBarBreakdown(containerId, map, total){
   });
 }
 
-function renderBreakdown(){
-  const converted = state.expenses.filter(e=>e._converted !== null && e._converted !== undefined);
-  const total = converted.reduce((s,e)=>s+e._converted,0);
-
-  const catMap = sumByKey(state.expenses, e=>e.category, 'אחר');
-  renderBarBreakdown('categoryBreakdown', catMap, total);
-
-  const countryMap = sumByKey(state.expenses, e=>e.country, 'ללא ציון');
-  renderBarBreakdown('countryBreakdown', countryMap, total);
-
-  const curDiv = document.getElementById('currencyBreakdown');
-  const curMap = {};
-  state.expenses.forEach(exp=>{
-    curMap[exp.currency] = curMap[exp.currency] || {sum:0,count:0};
-    curMap[exp.currency].sum += exp.amount;
-    curMap[exp.currency].count += 1;
-  });
-  curDiv.innerHTML = '';
-  const curs = Object.keys(curMap);
-  if(curs.length === 0){
-    curDiv.innerHTML = '<div class="ledger-empty" style="padding:8px 0;">אין עדיין נתונים</div>';
-  } else {
-    curs.sort((a,b)=>curMap[b].sum-curMap[a].sum).forEach(cur=>{
-      const row = document.createElement('div');
-      row.className = 'cur-row';
-      row.innerHTML = `<span class="cur-name">${cur} · ${curMap[cur].count}</span><span class="cur-amt">${curMap[cur].sum.toLocaleString()}</span>`;
-      curDiv.appendChild(row);
-    });
-  }
-
-  // stat strip
-  document.getElementById('statCount').textContent = state.expenses.length;
-  document.getElementById('statAvg').textContent = converted.length
-    ? (total/converted.length).toFixed(2).toLocaleString() + ' ' + state.homeCurrency
-    : '—';
-  const topCat = Object.keys(catMap).sort((a,b)=>catMap[b]-catMap[a])[0];
-  document.getElementById('statTopCat').textContent = topCat || '—';
-  const topCountry = Object.keys(countryMap).sort((a,b)=>countryMap[b]-countryMap[a])[0];
-  document.getElementById('statTopCountry').textContent = topCountry || '—';
-}
-
 function renderLedger(){
   const list = document.getElementById('ledgerList');
   const countLabel = document.getElementById('ledgerCount');
@@ -792,20 +949,33 @@ function renderLedger(){
     return;
   }
 
-  // Group by country
+  // Group by country first, then by category
   const byCountry = {};
   sorted.forEach(exp=>{
     const country = exp.country || 'ללא ציון מדינה';
-    if(!byCountry[country]) byCountry[country] = [];
-    byCountry[country].push(exp);
+    if(!byCountry[country]) byCountry[country] = {};
+    const category = exp.category || 'אחר';
+    if(!byCountry[country][category]) byCountry[country][category] = [];
+    byCountry[country][category].push(exp);
   });
 
   // Render each country section
   Object.keys(byCountry).forEach(country => {
-    const expenses = byCountry[country];
-    const totalConverted = expenses.reduce((sum, e) => sum + (e._converted !== null && e._converted !== undefined ? e._converted : 0), 0);
-    const totalCount = expenses.length;
+    const categories = byCountry[country];
+    const allExpenses = Object.values(categories).flat();
+    const totalConverted = allExpenses.reduce((sum, e) => sum + (e._converted !== null && e._converted !== undefined ? e._converted : 0), 0);
+    const totalCount = allExpenses.length;
     const countryCode = country === 'ללא ציון מדינה' ? '?' : country.slice(0, 2).toUpperCase();
+
+    // Calculate days if country has date range
+    let daysText = '';
+    if(state.countries[country] && state.countries[country].start && state.countries[country].end){
+      const start = new Date(state.countries[country].start);
+      const end = new Date(state.countries[country].end);
+      const diffTime = Math.abs(end - start);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      daysText = `(${diffDays} ימים)`;
+    }
 
     const section = document.createElement('div');
     section.className = 'country-section';
@@ -815,7 +985,7 @@ function renderLedger(){
     header.innerHTML = `
       <div class="country-name">
         <div class="country-flag">${countryCode}</div>
-        ${escapeHtml(country)}
+        ${escapeHtml(country)} ${daysText}
       </div>
       <div class="country-stats">
         <div class="country-stat">
@@ -830,40 +1000,78 @@ function renderLedger(){
     const content = document.createElement('div');
     content.className = 'country-content';
 
-    expenses.forEach(exp => {
-      const row = document.createElement('div');
-      row.className = 'ledger-item';
-      const convText = exp._converted !== null && exp._converted !== undefined
-        ? exp._converted.toFixed(2).toLocaleString() + ' ' + state.homeCurrency
-        : '—';
-      row.innerHTML = `
-        <span class="ledger-date">${exp.date.slice(5)}</span>
-        <span class="ledger-mid">
-          <span class="ledger-tags">
-            <span class="ledger-cat">${exp.category}</span>
-          </span>
-          ${exp.note ? `<span class="ledger-note">${escapeHtml(exp.note)}</span>` : ''}
-        </span>
-        <span class="ledger-orig">${exp.amount.toLocaleString()} ${exp.currency}</span>
-        <span class="ledger-conv">${convText}</span>
-        <button class="del-btn" data-id="${exp.id}" title="מחיקה" aria-label="מחיקת הוצאה">✕</button>
-      `;
-      content.appendChild(row);
-    });
+    // Render categories within country
+    Object.keys(categories).forEach(category => {
+      const expenses = categories[category];
+      const catTotal = expenses.reduce((sum, e) => sum + (e._converted !== null && e._converted !== undefined ? e._converted : 0), 0);
+      const catCount = expenses.length;
 
-    // Toggle collapse
-    header.addEventListener('click', () => {
-      content.classList.toggle('collapsed');
+      const catSection = document.createElement('div');
+      catSection.className = 'category-section';
+
+      const catHeader = document.createElement('div');
+      catHeader.className = 'category-header';
+      catHeader.innerHTML = `
+        <div class="category-name">
+          <span class="category-icon">${category.slice(0, 1)}</span>
+          ${escapeHtml(category)}
+        </div>
+        <div class="category-stats">
+          <span class="cat-count">${catCount}</span>
+          <span class="cat-total">${catTotal.toFixed(2).toLocaleString()} ${state.homeCurrency}</span>
+        </div>
+      `;
+
+      const catContent = document.createElement('div');
+      catContent.className = 'category-content';
+
+      expenses.forEach(exp => {
+        const row = document.createElement('div');
+        row.className = 'ledger-item';
+        const convText = exp._converted !== null && exp._converted !== undefined
+          ? exp._converted.toFixed(2).toLocaleString() + ' ' + state.homeCurrency
+          : '—';
+        row.innerHTML = `
+          <span class="ledger-date">${exp.date.slice(5)}</span>
+          <span class="ledger-mid">
+            <span class="ledger-tags">
+              ${exp.note ? `<span class="ledger-note">${escapeHtml(exp.note)}</span>` : ''}
+            </span>
+          </span>
+          <span class="ledger-orig">${exp.amount.toFixed(2)} ${exp.currency}</span>
+          <span class="ledger-conv">${convText}</span>
+          <button class="del-btn" data-id="${exp.id}" title="מחק">✕</button>
+        `;
+        catContent.appendChild(row);
+      });
+
+      catSection.appendChild(catHeader);
+      catSection.appendChild(catContent);
+      content.appendChild(catSection);
+
+      // Toggle category collapse
+      catHeader.addEventListener('click', (e) => {
+        e.stopPropagation();
+        catContent.classList.toggle('collapsed');
+      });
     });
 
     section.appendChild(header);
     section.appendChild(content);
     list.appendChild(section);
+
+    // Toggle country collapse
+    header.addEventListener('click', () => {
+      content.classList.toggle('collapsed');
+    });
   });
 
-  list.querySelectorAll('.del-btn').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      state.expenses = state.expenses.filter(e=>e.id !== btn.dataset.id);
+  // Add delete listeners
+  list.querySelectorAll('.del-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      state.expenses = state.expenses.filter(exp => exp.id !== id);
       await saveState();
       await refreshAll();
     });
@@ -880,9 +1088,10 @@ async function refreshAll(){
   await computeConversions();
   const total = state.expenses.reduce((s,e)=> s + (e._converted || 0), 0);
   renderFlaps(total);
-  renderBreakdown();
+  renderDashboardCharts();
   renderLedger();
   renderCountryList();
+  renderCountriesList();
 }
 
 document.getElementById('tripName').addEventListener('change', async (e)=>{
@@ -901,21 +1110,38 @@ document.getElementById('homeCurrency').addEventListener('change', async (e)=>{
 document.getElementById('addCurBtn').addEventListener('click', async ()=>{
   const input = document.getElementById('newCurCode');
   const code = input.value.trim().toUpperCase();
+  const msg = document.getElementById('currencyMsg');
+
   if(code.length !== 3){
-    document.getElementById('formMsg').textContent = 'קוד מטבע צריך להיות 3 אותיות (למשל USD)';
+    msg.textContent = 'קוד מטבע צריך להיות 3 אותיות (למשל USD)';
+    msg.style.color = 'var(--danger)';
     return;
   }
-  if(!state.currencies.includes(code)) state.currencies.push(code);
+
+  if(state.currencies.includes(code)){
+    msg.textContent = 'המטבע כבר קיים ברשימה';
+    msg.style.color = 'var(--danger)';
+    return;
+  }
+
+  state.currencies.push(code);
   input.value = '';
-  document.getElementById('formMsg').textContent = '';
   await saveState();
   renderCurrencySelect();
+
   // Clear cache for the new currency to force refresh
   Object.keys(rateCache).forEach(key => {
     if(key.includes(code)) delete rateCache[key];
   });
   await saveRateCache();
   await renderRateTicker();
+
+  // Show success notification
+  msg.textContent = `✓ המטבע ${code} נוסף בהצלחה!`;
+  msg.style.color = 'var(--teal)';
+  setTimeout(() => {
+    msg.textContent = '';
+  }, 2000);
 });
 
 document.getElementById('refreshRates').addEventListener('click', async (e)=>{
@@ -968,11 +1194,158 @@ document.getElementById('addExpenseBtn').addEventListener('click', async ()=>{
   document.getElementById('fCountry').value = country; // keep last country for convenience
 
   await refreshAll();
-  if(exp.manualRate){
-    document.getElementById('formMsg').textContent = 'הוצאה נוספה עם שער ידני';
-    setTimeout(() => { document.getElementById('formMsg').textContent = ''; }, 2000);
-  }
+
+  // Show success notification
+  document.getElementById('formMsg').textContent = '✓ הוצאה נוספה בהצלחה!';
+  document.getElementById('formMsg').style.color = 'var(--teal)';
+  setTimeout(() => {
+    document.getElementById('formMsg').textContent = '';
+    document.getElementById('formMsg').style.color = 'var(--danger)';
+  }, 2000);
 });
+
+// Render countries list
+function renderCountriesList(){
+  const container = document.getElementById('countriesList');
+  const usedCountries = [...new Set(state.expenses.map(e => e.country).filter(c => c))];
+
+  if(usedCountries.length === 0){
+    container.innerHTML = '<div class="ledger-empty">עדיין לא נוספו הוצאות</div>';
+    return;
+  }
+
+  container.innerHTML = '';
+  usedCountries.forEach(country => {
+    const countryData = state.countries[country] || { start: '', end: '' };
+    const start = countryData.start || '';
+    const end = countryData.end || '';
+
+    // Calculate days
+    let daysText = '';
+    if(start && end){
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      const diffTime = Math.abs(endDate - startDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      daysText = `(${diffDays} ימים)`;
+    }
+
+    const row = document.createElement('div');
+    row.className = 'country-row';
+    row.innerHTML = `
+      <div class="country-row-name">${escapeHtml(country)}</div>
+      <div class="country-row-dates">
+        <input type="date" class="country-start" value="${start}" placeholder="התחלה">
+        <input type="date" class="country-end" value="${end}" placeholder="סיום">
+      </div>
+      <div class="country-row-days">${daysText}</div>
+      <button class="country-row-save" data-country="${escapeHtml(country)}">שמור</button>
+    `;
+    container.appendChild(row);
+  });
+
+  // Add save listeners
+  container.querySelectorAll('.country-row-save').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const country = btn.dataset.country;
+      const start = btn.parentElement.querySelector('.country-start').value;
+      const end = btn.parentElement.querySelector('.country-end').value;
+
+      if(start && end && new Date(start) > new Date(end)){
+        alert('תאריך התחלה חייב להיות לפני תאריך הסיום');
+        return;
+      }
+
+      state.countries[country] = { start, end };
+      await saveState();
+      renderCountriesList();
+      renderLedger();
+    });
+  });
+
+  // Add change listeners for live update of days
+  container.querySelectorAll('.country-start, .country-end').forEach(input => {
+    input.addEventListener('change', () => {
+      const row = input.closest('.country-row');
+      const start = row.querySelector('.country-start').value;
+      const end = row.querySelector('.country-end').value;
+      const daysDiv = row.querySelector('.country-row-days');
+
+      if(start && end){
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        const diffTime = Math.abs(endDate - startDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        daysDiv.textContent = `(${diffDays} ימים)`;
+      } else {
+        daysDiv.textContent = '';
+      }
+    });
+  });
+}
+
+// Navigation
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const page = btn.dataset.page;
+    // Update active button
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    // Show corresponding page
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(`page-${page}`).classList.add('active');
+    // Render countries list if on countries page
+    if(page === 'countries') renderCountriesList();
+  });
+});
+
+// Render dashboard charts
+function renderDashboardCharts(){
+  if(state.expenses.length === 0){
+    document.getElementById('categoryChart').innerHTML = '<div class="ledger-empty">עדיין לא נוספו הוצאות</div>';
+    document.getElementById('summaryTotal').textContent = '—';
+    document.getElementById('summaryCount').textContent = '0';
+    document.getElementById('summaryAvg').textContent = '—';
+    return;
+  }
+
+  const total = state.expenses.reduce((sum, e) => sum + (e._converted || 0), 0);
+  const count = state.expenses.length;
+  const avg = total / count;
+
+  document.getElementById('summaryTotal').textContent = total.toFixed(2).toLocaleString() + ' ' + state.homeCurrency;
+  document.getElementById('summaryCount').textContent = count;
+  document.getElementById('summaryAvg').textContent = avg.toFixed(2).toLocaleString() + ' ' + state.homeCurrency;
+
+  // Group by category
+  const byCategory = {};
+  state.expenses.forEach(exp => {
+    const cat = exp.category || 'אחר';
+    if(!byCategory[cat]) byCategory[cat] = 0;
+    byCategory[cat] += exp._converted || 0;
+  });
+
+  // Render category chart only
+  renderChart('categoryChart', byCategory, total);
+}
+
+function renderChart(containerId, data, total){
+  const container = document.getElementById(containerId);
+  const sorted = Object.keys(data).sort((a,b) => data[b] - data[a]);
+
+  let html = '<div class="summary-list">';
+  sorted.forEach(key => {
+    const value = data[key];
+    html += `
+      <div class="summary-row">
+        <span class="summary-label">${key}</span>
+        <span class="summary-total">${value.toFixed(2).toLocaleString()} ${state.homeCurrency}</span>
+      </div>
+    `;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
 
 async function init(){
   await loadState();
@@ -986,6 +1359,7 @@ async function init(){
   renderCountryList();
   await renderRateTicker();
   await refreshAll();
+  renderCountriesList();
 }
 
 init();
