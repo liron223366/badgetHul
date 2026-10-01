@@ -371,6 +371,27 @@ body{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 .ptr .pos{color:var(--ok);font-weight:800}.ptr .neg{color:var(--danger);font-weight:800}
 .pot-row{background:none;border:0;border-bottom:1px solid var(--border);width:100%;text-align:right;color:var(--text)}
 .pot-badge{background:var(--main-light);color:var(--main);font-weight:700;font-size:13px;border-radius:12px;padding:10px 12px;margin-bottom:14px}
+.fab.pot{background:linear-gradient(135deg,#ff7043,#ffa726);box-shadow:0 6px 18px rgba(255,112,67,.45)}
+.sheet.pot-mode{border-top:6px solid #ff8a65}
+.sheet.pot-mode .sheet-title{color:#f4511e}
+.sheet.pot-mode .pot-badge{background:#fff3e0;color:#e65100}
+.sheet.pot-mode .amount-input{border-color:#ffab91}
+.sheet.pot-mode .btn-main{background:linear-gradient(135deg,#ff7043,#ffa726);box-shadow:0 4px 14px rgba(255,112,67,.35)}
+.sheet.pot-mode .chip.on{background:#ff7043}
+.sheet.dep-mode{border-top:6px solid var(--main-2)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sheet.pot-mode .pot-badge{background:#3a2517;color:#ffab91}}
+.qm{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:0;background:var(--main-light);color:var(--main);font-size:11px;font-weight:800;padding:0;vertical-align:middle;margin-inline-start:4px;line-height:1}
+.board .qm,.pot-hero .qm{background:rgba(255,255,255,.25);color:#fff}
+.help-card{padding:4px 14px}
+.help-item{border-bottom:1px solid var(--border);padding:12px 0;scroll-margin-top:90px;transition:background .3s;border-radius:8px}
+.help-item:last-child{border-bottom:0}
+.help-item summary{font-weight:700;font-size:15px;cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px}
+.help-item summary::-webkit-details-marker{display:none}
+.help-item summary::after{content:'▾';margin-inline-start:auto;color:var(--muted);font-size:12px;transition:transform .2s}
+.help-item[open] summary::after{transform:rotate(180deg)}
+.help-item p{margin:8px 0 0;padding-inline-start:34px;color:var(--text);line-height:1.6;font-size:14px}
+.help-item .hi{width:26px;text-align:center;font-size:18px}
+.help-item.flash{background:var(--main-light)}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -381,6 +402,7 @@ body{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
     <span class="header-logo">✈️</span>
     <input class="trip-name" id="tripName" placeholder="שם הטיול" aria-label="שם הטיול" maxlength="60">
     <span class="home-badge">₪ שקל</span>
+    <button class="hdr-btn" data-page="help" aria-label="מילון מושגים">❓</button>
     <button class="hdr-btn" data-page="settings" aria-label="הגדרות">⚙️</button>
   </div>
 </header>
@@ -452,6 +474,11 @@ body{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
   <!-- WALLET -->
   <section class="page" id="page-wallet"><div id="wallet"></div></section>
   <section class="page" id="page-shared"><div id="shared"></div></section>
+  <section class="page" id="page-help">
+    <div class="card"><h2>📖 מילון מושגים</h2><p class="muted" style="margin-bottom:10px">כל המושגים באפליקציה, בשפה פשוטה. לחיצה על מושג פותחת הסבר. גם סימני ה־? שבאפליקציה מובילים לכאן.</p>
+      <input class="input" id="helpSearch" type="search" placeholder="🔍 חיפוש מושג"></div>
+    <div id="helpList"></div>
+  </section>
 
   <!-- SETTINGS -->
   <section class="page" id="page-settings">
@@ -520,7 +547,7 @@ body{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
     <button data-page="wallet"><span class="nav-icon">💵</span>מזומן</button>
   </div>
 </nav>
-<button class="fab" data-page="add" aria-label="הוספת הוצאה"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+<button class="fab" id="fab" data-page="add" aria-label="הוספת הוצאה"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
 
 <!-- ADD / EDIT SHEET -->
 <div class="sheet-overlay" id="addSheet">
@@ -529,14 +556,13 @@ body{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
     <div class="sheet-title" id="formTitle">הוצאה חדשה</div>
     <input class="input amount-input" id="fAmount" type="text" inputmode="decimal" placeholder="0" autocomplete="off" aria-label="סכום">
     <div class="preview" id="fPreview"></div>
-    <div class="field"><label>מטבע</label><div class="chips" id="fCurChips"></div>
+    <div class="field"><label>מטבע <button class="qm" data-help="locked-rate" aria-label="מה זה?">?</button></label><div class="chips" id="fCurChips"></div>
       <div class="cur-extra"><span class="muted" id="fCurHint"></span><select class="other-cur" id="fOtherCur" aria-label="מטבע אחר"></select></div></div>
     <div class="seg pay" id="fMethod" role="group" aria-label="אמצעי תשלום">
       <button data-method="card">💳 כרטיס</button><button data-method="cash">💵 מזומן</button><button data-method="pot" id="fMethodPot" hidden>👫 לקופה</button>
     </div>
-    <div class="pot-badge" id="fPotBadge" hidden>💸 משולם מהקופה המשותפת ומתחלק שווה בין כולם</div>
+    <div class="pot-badge" id="fPotBadge" hidden>🏦 יורד מהקופה המשותפת ומתחלק שווה בשווה בין כולם</div>
     <div class="field" id="fPotWhoBox" hidden><label>מי הפקיד</label><div class="chips" id="fPotWho"></div></div>
-    <label class="check" id="fPotWalletBox" hidden><input type="checkbox" id="fPotWallet" checked> יורד מארנק המזומן שלי</label>
     <div class="field" id="fCardBox" hidden><label>באיזה כרטיס</label><div class="chips" id="fCards"></div></div>
     <div class="field" id="fCatField"><label>קטגוריה</label><div class="cats" id="fCats"></div></div>
     <div class="row2" id="fCountryRow">
@@ -546,7 +572,7 @@ body{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
     <button class="chip pre-chip" id="fPreChip" data-setcountry="לפני הטיול">✈️ הוצאה לפני הטיול (טיסות, ביטוח, ציוד)</button>
     <div class="field"><label for="fNote">תיאור (אופציונלי)</label><input class="input" id="fNote" placeholder="ארוחת ערב בשוק הלילה" maxlength="80"></div>
     <div class="field" id="fShareBox" hidden>
-      <label>👫 של מי ההוצאה</label>
+      <label>👫 של מי ההוצאה <button class="qm" data-help="whose" aria-label="מה זה?">?</button></label>
       <div class="chips" id="fShareChips"></div>
       <div id="fWithRow" hidden style="margin-top:10px"><label>מי בפנים</label><div class="chips" id="fWith"></div></div>
       <div id="fSplitRow" hidden style="margin-top:10px"><label>איך מתחלקים</label><div class="chips" id="fSplitMode"></div><div id="fCustom"></div></div>
@@ -1076,7 +1102,7 @@ function renderCashSheet(){
         <div class="field"><label for="cxAmt">סכום</label><input class="input" id="cxAmt" inputmode="decimal" dir="ltr" value="${sugLocal ? Math.round(sugLocal*100)/100 : ''}" placeholder="0"></div>
         <div class="field"><label for="cxSCur">מטבע</label><select class="input" id="cxSCur">${curs.map(c=>`<option value="${c}" ${c===sc?'selected':''}>${c} ${esc(sym(c))}</option>`).join('')}</select></div>
       </div>
-      ${m === 'cash' && sc !== HOME ? `<label class="check"><input type="checkbox" id="cxWallet" checked> ${dir === 'out' ? 'יצא מארנק המזומן שלי' : 'נכנס לארנק המזומן שלי'}</label>` : ''}
+      ${m === 'cash' && sc !== HOME ? `<div class="muted" style="margin:-6px 0 12px">💵 ${dir === 'out' ? 'יירד מארנק המזומן שלך' : 'ייכנס לארנק המזומן שלך'}</div>` : ''}
       <div class="field"><label for="cxNote">הערה</label><input class="input" id="cxNote" placeholder="${dir === 'in' ? 'למשל: שילם/ה לי על ארוחת ערב' : 'למשל: העברתי בביט'}"></div>
       <div class="insight" id="cxHint" hidden></div>
       ${actions('שמור החזר')}`;
@@ -1161,7 +1187,7 @@ function saveCash(){
   if(mode === 'settle'){
     const p = cashSheet.partner, dir = cashSheet.dir || 'in', m = cashSheet.smethod || 'bit';
     const sc = $('cxSCur').value, r = rate(sc, HOME);
-    const useWallet = !!($('cxWallet') && $('cxWallet').checked);
+    const useWallet = m === 'cash' && sc !== HOME;
     const x = cash.W[sc];
     const unit = sc === HOME ? 1 : (useWallet && dir === 'out' && avgOf(x) ? avgOf(x) : r);
     if(!unit){ err.textContent = 'אין שער למטבע הזה כרגע'; return; }
@@ -1263,7 +1289,7 @@ function renderWallet(){
     return;
   }
   html += `<div class="card"><div class="trip-sum" style="margin-top:0">
-      <div class="kpi"><small>מזומן ביד</small><b>${money(totalIls, HOME, true)}</b></div>
+      <div class="kpi"><small>מזומן ביד ${qm('wallet')}</small><b>${money(totalIls, HOME, true)}</b></div>
       <div class="kpi"><small>עמלות המרה</small><b>${money(fees, HOME, true)}</b></div>
       <div class="kpi"><small>ארנקים</small><b>${curs.length}</b></div>
     </div><div class="muted" style="margin-top:8px;font-size:12px">מזומן בארנק הוא עוד לא הוצאה. הוא נספר רק כשאתה קונה איתו.</div></div>`;
@@ -1291,7 +1317,7 @@ function renderWallet(){
       <div class="w-bal">${money(x.bal, c, true)}</div>
       <div class="muted">${avg ? `≈ ${money(x.bal*avg, HOME, true)} לפי מה ששילמת` : 'הארנק ריק'}</div>
       <div class="country-kpis" style="margin-top:12px">
-        <div class="kpi"><small>השער שלך</small><b>${myRate ? fmtRate(myRate) : '—'}</b></div>
+        <div class="kpi"><small>השער שלך ${qm('my-rate')}</small><b>${myRate ? fmtRate(myRate) : '—'}</b></div>
         <div class="kpi"><small>שער השוק</small><b>${mkt ? fmtRate(mkt) : '—'}</b></div>
         <div class="kpi"><small>עמלות</small><b>${money(x.fees, HOME, true)}</b></div>
       </div>
@@ -1371,7 +1397,7 @@ function renderPartners(){
   const b = partnerBalances();
   const shared = state.expenses.filter(e=>isShared(e) && e.method !== 'pot');
   const sets = [...(state.settlements || [])].sort((x,y)=>(y.date||'').localeCompare(x.date||'') || (y.ts||0)-(x.ts||0));
-  el.innerHTML = `<h2>👫 חשבון משותף</h2>
+  el.innerHTML = `<h2>👫 מי חייב למי ${qm('balance')}</h2>
     ${ps.map(p=>{
       const v = b[p] || 0;
       const txt = Math.abs(v) < 1 ? `את/ה ו${esc(p)} מאוזנים ✓` : v > 0 ? `${esc(p)} חייב/ת לך <b>${money(v,HOME,true)}</b>` : `את/ה חייב/ת ל${esc(p)} <b>${money(-v,HOME,true)}</b>`;
@@ -1608,7 +1634,7 @@ function renderShared(){
 
   el.innerHTML = `
     <section class="board pot-hero">
-      <div class="board-label">🏦 הקופה המשותפת</div>
+      <div class="board-label">🏦 הקופה המשותפת ${qm('pot')}</div>
       <div class="total-val">${money(total, HOME, true)}</div>
       <div class="pot-curs">${curs.length ? curs.map(c=>`<span class="cash-chip">${money(cash.pot.W[c].bal, c, true)}</span>`).join('') : '<span class="pot-empty">הקופה ריקה. כל אחד מכניס מזומן, ומשלמים ממנה על דברים משותפים.</span>'}</div>
       <div class="pot-actions">
@@ -1619,7 +1645,7 @@ function renderShared(){
     </section>
 
     <div class="card">
-      <h2>🧮 מי שם כמה</h2>
+      <h2>🧮 מי שם כמה ${qm('pot-balance')}</h2>
       <div class="ptable">
         <div class="ptr head"><span></span><span>הכניס</span><span>חלק בהוצאות</span><span>יתרה</span></div>
         ${people.map(p=>`<div class="ptr"><span class="pname">${esc(who(p.m))}</span><span>${money(p.in,HOME,true)}</span><span>${money(p.share,HOME,true)}</span>
@@ -1671,7 +1697,7 @@ function renderPotOut(b, actions){
       <div class="field"><label for="cxAmt">כמה</label><input class="input" id="cxAmt" inputmode="decimal" dir="ltr" value="${sug ? Math.floor(sug) : ''}" placeholder="0"></div>
       <div class="field"><label for="cxCur">מטבע</label><select class="input" id="cxCur">${curs.map(c=>`<option value="${c}" ${c===cur?'selected':''}>${c} · ${money(cash.pot.W[c].bal, c, true)}</option>`).join('')}</select></div>
     </div>
-    ${whoK === 'me' && cur !== HOME ? `<label class="check"><input type="checkbox" id="cxWallet" checked> נכנס לארנק המזומן שלי</label>` : ''}
+    ${whoK === 'me' && cur !== HOME ? `<div class="muted" style="margin:-6px 0 12px">💵 ייכנס לארנק המזומן שלך</div>` : ''}
     <div class="insight" id="cxHint" hidden></div>
     ${actions('שמור')}`;
   cashSheet.cur = cur;
@@ -1683,7 +1709,7 @@ function savePotOut(err, newId){
   const whoK = cashSheet.who || 'me';
   const ils = amt * (potAvg(cur) || rate(cur, HOME) || 0);
   const op = { id:newId(), ts:Date.now(), type:'out', date:localDate(), who:whoK, currency:cur, amount:amt };
-  if(whoK === 'me' && cur !== HOME && $('cxWallet') && $('cxWallet').checked){
+  if(whoK === 'me' && cur !== HOME){
     op.walletOp = newId();
     state.cashOps.push({ id:op.walletOp, ts:Date.now(), type:'receive', date:op.date, currency:cur, amount:amt, ils, market:rate(cur, HOME), note:'מהקופה המשותפת' });
     if(!state.currencies.includes(cur)) state.currencies.push(cur);
@@ -1709,10 +1735,15 @@ function applyKind(){
   $('fMethod').hidden = pexp || (form.currency === HOME && !hasP);
   document.querySelectorAll('#fMethod button').forEach(b=>b.classList.toggle('on', dep ? b.dataset.method === 'pot' : b.dataset.method === form.method));
   $('fPotBadge').hidden = !pexp;
+  $('addSheet').querySelector('.sheet').classList.toggle('pot-mode', pexp);
+  $('addSheet').querySelector('.sheet').classList.toggle('dep-mode', dep);
+  if(pexp){
+    const cs = potCurs(); if(!cs.includes(form.currency) && cs.length) form.currency = cs[0];
+    $('fCurChips').innerHTML = cs.map(c=>`<button class="chip ${c===form.currency?'on':''}" data-cur="${esc(c)}">${esc(sym(c))} ${esc(c)} <small>${nf0.format(cash.pot.W[c].bal)}</small></button>`).join('');
+  }
+  $('fOtherCur').hidden = pexp; $('fCurHint').hidden = pexp;
   $('fPotWhoBox').hidden = !dep;
   if(dep) $('fPotWho').innerHTML = ['me', ...(state.partners || [])].map(p=>`<button class="chip ${form.potWho===p?'on':''}" data-potwhoform="${esc(p)}">${esc(who(p))}</button>`).join('');
-  const x = cash.W[form.currency];
-  $('fPotWalletBox').hidden = !(dep && form.potWho === 'me' && form.currency !== HOME && x && x.bal > 0);
   ['fCatField','fCountryRow','fPreChip'].forEach(id=>{ $(id).hidden = dep; });
   if(dep || pexp){ $('fShareBox').hidden = true; $('fCardBox').hidden = true; $('manualWrap').hidden = true; }
   if(!editingId){
@@ -1722,10 +1753,16 @@ function applyKind(){
 }
 function potPreview(p, amt){
   if(form.kind === 'potDeposit'){
-    if(!isFinite(amt) || amt <= 0){ p.innerHTML = 'הפקדה היא לא הוצאה. היא נספרת רק כשמשלמים מהקופה.'; return true; }
-    const useW = form.potWho === 'me' && !$('fPotWalletBox').hidden && $('fPotWallet').checked;
-    const r = form.currency === HOME ? 1 : (useW ? avgOf(cash.W[form.currency]) : rate(form.currency, HOME));
-    p.innerHTML = `≈ <b>${money(amt * (r || 0))}</b>${useW ? ` <span class="muted">יירד מהארנק שלך (יש ${money(cash.W[form.currency].bal, form.currency, true)})</span>` : ''}`;
+    const fromW = form.potWho === 'me' && form.currency !== HOME;
+    const x = cash.W[form.currency], bal = x ? x.bal : 0;
+    if(!isFinite(amt) || amt <= 0){
+      p.innerHTML = fromW ? `💵 בארנק שלך: <b>${money(bal, form.currency, true)}</b>. ההפקדה תרד ממנו.` : 'הפקדה היא לא הוצאה. היא נספרת רק כשמשלמים מהקופה.';
+      return true;
+    }
+    const v = depositValue(amt);
+    p.innerHTML = `≈ <b>${money(v)}</b>` + (fromW ? (amt > bal + 0.001
+      ? `<br><span style="color:var(--danger)">בארנק יש רק ${money(bal, form.currency, true)}. אם משכת כסף ולא רשמת, כדאי לרשום קודם משיכה.</span>`
+      : `<br><span class="muted">יירד מהארנק שלך, יישארו ${money(bal - amt, form.currency, true)}</span>`) : '');
     return true;
   }
   if(form.kind === 'potExpense'){
@@ -1739,23 +1776,109 @@ function potPreview(p, amt){
   }
   return false;
 }
+function depositValue(amt){
+  const cur = form.currency;
+  if(cur === HOME) return amt;
+  const mkt = rate(cur, HOME) || 0;
+  if(form.potWho !== 'me') return amt * mkt;
+  const x = cash.W[cur], bal = x ? x.bal : 0, avg = avgOf(x) || mkt;
+  const covered = Math.min(amt, bal);
+  return covered * avg + (amt - covered) * mkt;
+}
 function saveDeposit(amount){
   const cur = form.currency, whoK = form.potWho || 'me';
-  const useW = whoK === 'me' && !$('fPotWalletBox').hidden && $('fPotWallet').checked;
-  const r = cur === HOME ? 1 : (useW ? avgOf(cash.W[cur]) : rate(cur, HOME));
-  if(!r){ $('formErr').textContent = 'אין שער למטבע הזה כרגע'; return; }
+  const fromW = whoK === 'me' && cur !== HOME;
+  if(cur !== HOME && !rate(cur, HOME) && !(fromW && avgOf(cash.W[cur]))){ $('formErr').textContent = 'אין שער למטבע הזה כרגע'; return; }
   const id = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
-  const op = { id, ts:Date.now(), type:'in', date:$('fDate').value || localDate(), who:whoK, currency:cur, amount:Math.round(amount*100)/100, ils:amount * r, note:$('fNote').value.trim() };
-  if(useW){
+  const amt = Math.round(amount*100)/100;
+  const op = { id, ts:Date.now(), type:'in', date:$('fDate').value || localDate(), who:whoK, currency:cur, amount:amt, ils:depositValue(amt), note:$('fNote').value.trim() };
+  if(fromW){
     op.walletOp = 'c' + id;
-    state.cashOps.push({ id:op.walletOp, ts:Date.now(), type:'give', date:op.date, currency:cur, amount:op.amount, ils:op.ils, market:rate(cur, HOME), note:'לקופה המשותפת' });
+    state.cashOps.push({ id:op.walletOp, ts:Date.now(), type:'give', date:op.date, currency:cur, amount:amt, ils:op.ils, market:rate(cur, HOME), note:'לקופה המשותפת' });
   }
   if(cur !== HOME && !state.currencies.includes(cur)) state.currencies.push(cur);
   state.potOps.push(op);
   saveState();
   closeSheet();
   renderAll();
-  toast(`✓ ${whoK === 'me' ? 'הפקדת' : who(whoK) + ' הפקיד/ה'} ${nf0.format(op.amount)} ${sym(cur)}. בקופה: ${nf0.format(cash.pot.W[cur].bal)} ${sym(cur)}`);
+  const left = fromW && cash.W[cur] ? `. בארנק שלך: ${nf0.format(cash.W[cur].bal)} ${sym(cur)}` : '';
+  toast(`✓ ${whoK === 'me' ? 'הפקדת' : whoK + ' הפקיד/ה'} ${nf0.format(amt)} ${sym(cur)}${left}`);
+}
+
+/* =========================================================
+   Glossary (מילון מושגים)
+   ========================================================= */
+const GLOSSARY = [
+  ['שערים והמרות', [
+    ['live-rate','🟢','שער חי','השער של המטבע ברגע זה. הוא מתעדכן כל דקה מהאינטרנט, והנקודה הירוקה בראש המסך מראה שהוא עדכני.'],
+    ['locked-rate','🔒','שער בזמן הקנייה','כשמוסיפים הוצאה, השער של אותו רגע "ננעל" עליה. גם אם השער ישתנה מחר, ההוצאה נשארת באותו סכום בשקלים.'],
+    ['manual-rate','✍️','שער ידני','אם אתה יודע בדיוק באיזה שער חויבת (למשל מפירוט האשראי), אפשר להקליד אותו במקום השער החי.'],
+    ['card-fee','💳','עמלת כרטיס','אחוז שחברת האשראי מוסיפה על כל עסקה במטבע חוץ, בדרך כלל בערך 2% עד 3.5%. מגדירים אותה בהגדרות, והיא מתווספת לבד לקניות בכרטיס.'],
+    ['cheat','📋','דף מחירים מהיר','טבלה בכל מדינה במסלול שמראה כמה שווים בשקלים סכומים נפוצים במטבע המקומי. שימושי בשוק.'],
+    ['pending','⏳','ממתין לשער','הוצאה שנרשמה בלי אינטרנט ובלי שער שמור. היא תומר לשקלים לבד כשיחזור חיבור.']
+  ]],
+  ['מזומן', [
+    ['wallet','💵','ארנק מזומן','המזומן שיש לך ביד, בכל מטבע. הוא לא נחשב הוצאה עד שקונים איתו משהו.'],
+    ['withdraw','🏧','משיכה','כשמושכים מכספומט או מחליפים כסף. רושמים כמה קיבלת ביד וכמה זה עלה לך בשקלים, והכסף נכנס לארנק.'],
+    ['my-rate','🎯','השער שלך','כמה עלתה לך בפועל כל יחידה של מזומן, כולל עמלות. קניות במזומן מחושבות לפיו, ולא לפי שער השוק.'],
+    ['fees','🧾','עמלות המרה','ההפרש בין מה ששילמת בפועל על המזומן לבין מה שהוא היה עולה לפי שער השוק.'],
+    ['count','🧮','ספירת ארנק','סופרים את המזומן ומקלידים כמה יש. אם חסר, ההפרש נרשם כ"מזומן לא רשום". אם יש יותר, הוא מתווסף לארנק.'],
+    ['unrecorded','❔','מזומן לא רשום','קניות קטנות ששכחת לרשום (מים, טיפ, טוקטוק) ומתגלות בספירת ארנק. הן נספרות כהוצאה כדי שהסה״כ יהיה נכון.'],
+    ['leftover','🏁','שארית','מזומן שנשאר כשעוזבים מדינה. אפשר להחליף אותו למטבע אחר או לשקלים, או לרשום אותו כהוצאה.']
+  ]],
+  ['מסלול ותקציב', [
+    ['route','🧭','מסלול','רשימת המדינות בטיול לפי הסדר, עם תאריכים, מטבע מקומי ותקציב לכל אחת.'],
+    ['daily','📆','תקציב יומי','כמה מותר להוציא היום כדי לעמוד בתקציב של המדינה. הוא מתעדכן כל יום לפי מה שכבר הוצאת: חסכת אתמול, מותר לך יותר היום.'],
+    ['forecast','🔮','תחזית','כמה תוציא בסוף המדינה או הטיול, אם תמשיך באותו קצב.'],
+    ['avg','📊','ממוצע ליום','סך ההוצאות חלקי מספר הימים שעברו בטיול. הוצאות "לפני הטיול" לא נכנסות אליו.'],
+    ['pre','✈️','לפני הטיול','טיסות, ביטוח, ציוד וכל מה ששילמת לפני היציאה. נספר בסה״כ של הטיול, אבל לא בממוצע היומי.']
+  ]],
+  ['טיול משותף', [
+    ['partner','👥','שותף','מי שנוסע איתך. מוסיפים אותו בלשונית "משותף".'],
+    ['my-share','🍰','החלק שלך','מה שבאמת שייך לך מהוצאה משותפת. רק הוא נספר בתקציב ובסיכומים שלך.'],
+    ['whose','🙋','של מי ההוצאה','"רק שלי", "משותף" (מתחלקים), או "כולו של השותף" (שילמת רק בשבילו).'],
+    ['payer','💳','מי שילם','מי הוציא את הכסף בפועל. יחד עם "של מי ההוצאה", זה קובע מי חייב למי.'],
+    ['custom','✂️','חלוקה לפי סכום','במקום חצי חצי, כותבים כמה מתוך ההוצאה שייך לשותף. למשל 68 ₪ מתוך 200.'],
+    ['balance','⚖️','מי חייב למי','סיכום של כל ההוצאות המשותפות וההחזרים ביניכם. לא כולל את הקופה המשותפת, שיש לה חשבון משלה.'],
+    ['settle','🤝','החזר','כשמישהו מחזיר כסף: בביט, בהעברה, במזומן או בכל דרך אחרת. אפשר גם החזר חלקי.'],
+    ['closed','✅','סגרנו','מאפס את החוב אחרי שהתחשבנתם עד הסוף.'],
+    ['pot','🏦','קופה משותפת','מזומן ששניכם מכניסים לקופה אחת, ומשלמים ממנה על דברים משותפים.'],
+    ['deposit','➕','הפקדה','הכנסת כסף לקופה. הפקדה שלך יורדת אוטומטית מארנק המזומן שלך. הפקדה היא לא הוצאה.'],
+    ['pot-expense','💸','הוצאה מהקופה','תשלום מהקופה המשותפת. הוא מתחלק שווה בין כולם, ונרשם רק מלשונית "משותף".'],
+    ['pot-balance','🧮','יתרה בקופה','כמה מהכסף של כל אחד עוד נמצא בקופה: מה שהכניס, פחות החלק שלו בהוצאות, פחות מה שלקח.'],
+    ['pot-out','🔚','חלוקת הקופה','רישום של מי לקח כמה כסף מהקופה, בדרך כלל בסוף הטיול. מה שאתה לוקח חוזר לארנק המזומן שלך.']
+  ]],
+  ['האפליקציה', [
+    ['backup','💾','גיבוי','קובץ קטן עם כל הנתונים. שולחים אותו לעצמך בוואטסאפ או במייל, כי הנתונים נשמרים רק בטלפון.'],
+    ['restore','📥','שחזור','טוענים קובץ גיבוי כדי להחזיר את כל הנתונים, גם בטלפון חדש.'],
+    ['offline','📴','עבודה בלי אינטרנט','אחרי התקנה במסך הבית, האפליקציה נפתחת גם בלי קליטה. ההוצאות נרשמות לפי השער האחרון שנשמר.']
+  ]]
+];
+function renderHelp(){
+  const q = ($('helpSearch').value || '').trim();
+  const out = GLOSSARY.map(([group, items])=>{
+    const list = items.filter(([,,t,d])=>!q || t.includes(q) || d.includes(q));
+    if(!list.length) return '';
+    return `<div class="section-title">${esc(group)}</div><div class="card help-card">${list.map(([id,icon,t,d])=>
+      `<details class="help-item" id="help-${id}" ${q ? 'open' : ''}><summary><span class="hi">${icon}</span>${esc(t)}</summary><p>${esc(d)}</p></details>`).join('')}</div>`;
+  }).join('');
+  $('helpList').innerHTML = out || '<div class="empty">לא נמצא מושג כזה.</div>';
+}
+function showHelp(id){
+  go('help');
+  $('helpSearch').value = ''; renderHelp();
+  const el = $('help-' + id);
+  if(el){ el.open = true; setTimeout(()=>el.scrollIntoView({ behavior:'smooth', block:'center' }), 60); el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'), 1600); }
+}
+const qm = id => `<button class="qm" data-help="${id}" aria-label="מה זה?">?</button>`;
+
+function openPotExpense(){
+  if(!(state.partners || []).length){ go('shared'); return; }
+  const cs = potCurs();
+  if(!cs.length){ toast('הקופה ריקה. קודם מפקידים כסף', 'להפקדה', ()=>{ go('add'); form.kind = 'potDeposit'; renderForm(); }); return; }
+  go('add'); form.kind = 'potExpense';
+  form.currency = cs.sort((a,b)=>cash.pot.W[b].cost - cash.pot.W[a].cost)[0];
+  renderForm();
 }
 
 /* =========================================================
@@ -2006,7 +2129,7 @@ function renderCountries(){
       <div class="trip-sum">
         <div class="kpi"><small>הוצאת</small><b>${money(spent,HOME,true)}</b></div>
         <div class="kpi"><small>תקציב</small><b>${tb?money(tb,HOME,true):'—'}</b></div>
-        <div class="kpi"><small>תחזית לסוף</small><b>${money(fc,HOME,true)}</b></div>
+        <div class="kpi"><small>תחזית לסוף ${qm('forecast')}</small><b>${money(fc,HOME,true)}</b></div>
       </div>
       ${tb ? `<div class="insight ${diff > tb*0.02 ? 'warn':''}" style="margin:10px 0 0">${diff > tb*0.02
           ? `לפי הקצב והתכנון, הטיול יסתיים בחריגה של <b>${money(diff,HOME,true)}</b>.`
@@ -2040,7 +2163,7 @@ function renderCountries(){
       <div class="country-kpis">
         <div class="kpi"><small>הוצאת</small><b>${money(i.spent,HOME,true)}</b></div>
         <div class="kpi"><small>ליום בפועל</small><b>${i.perDayActual!=null && i.count ? money(i.perDayActual,HOME,true) : '—'}</b></div>
-        <div class="kpi"><small>מתוכנן ליום</small><b>${i.perDayPlan!=null ? money(i.perDayPlan,HOME,true) : '—'}</b></div>
+        <div class="kpi"><small>מתוכנן ליום ${qm('daily')}</small><b>${i.perDayPlan!=null ? money(i.perDayPlan,HOME,true) : '—'}</b></div>
       </div>
       <div class="insight ${ins.cls}">${ins.html}</div>
       ${cats.length ? `<div class="stack">${cats.map(k=>`<div style="width:${i.byCat[k]/i.spent*100}%;background:${catOf(k).color}"></div>`).join('')}</div>
@@ -2237,6 +2360,12 @@ function saveExpense(){
   }
   err.textContent = '';
   if(form.kind === 'potDeposit'){ saveDeposit(amount); return; }
+  if(form.kind === 'potExpense'){
+    const x = cash.pot.W[form.currency];
+    const old = editingId ? state.expenses.find(e=>e.id === editingId) : null;
+    const avail = (x ? x.bal : 0) + (old && old.method === 'pot' && old.currency === form.currency ? old.amount : 0);
+    if(amount > avail + 0.001){ err.textContent = `בקופה יש רק ${nf0.format(avail)} ${sym(form.currency)}`; return; }
+  }
   const manual = parseNum($('fManual').value);
   const hasManual = form.currency !== HOME && form.method !== 'cash' && isFinite(manual) && manual > 0;
   const data = {
@@ -2343,6 +2472,8 @@ function go(page, keepEdit){
   document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on', b.dataset.page === page));
   document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on', p.id === 'page-'+page));
   window.scrollTo({ top:0, behavior:'smooth' });
+  const fab = $('fab'); fab.classList.toggle('pot', page === 'shared' && (state.partners || []).length > 0); fab.hidden = page === 'help' || page === 'settings';
+  if(page === 'help') renderHelp();
 }
 function openSheet(){ $('addSheet').classList.add('open'); document.body.style.overflow = 'hidden'; }
 function closeSheet(){ $('addSheet').classList.remove('open'); document.body.style.overflow = ''; }
@@ -2355,15 +2486,12 @@ $('cashBody').addEventListener('change', e=>{ if(cashSheet.mode === 'potout' && 
    Events
    ========================================================= */
 document.addEventListener('click', e=>{
-  const t = e.target.closest('[data-potexp],[data-potdep],[data-potout],[data-potdel],[data-potwho],[data-potwhoform],[data-addpartner],[data-splitmode],[data-sharefor],[data-settlepart],[data-setdel],[data-smethod],[data-sdir],[data-card],[data-share],[data-payer],[data-settle],[data-carddel],[data-partnerdel],[data-backup],[data-install],[data-setcountry],[data-method],[data-cash],[data-cash-close],[data-cash-save],[data-choice],[data-opdel],[data-dismiss],[data-lc],[data-lc-all],[data-page],[data-go],[data-cur],[data-cat],[data-edit],[data-filter],[data-remove-cur],[data-csave],[data-cremove]');
+  const t = e.target.closest('[data-help],[data-potexp],[data-potdep],[data-potout],[data-potdel],[data-potwho],[data-potwhoform],[data-addpartner],[data-splitmode],[data-sharefor],[data-settlepart],[data-setdel],[data-smethod],[data-sdir],[data-card],[data-share],[data-payer],[data-settle],[data-carddel],[data-partnerdel],[data-backup],[data-install],[data-setcountry],[data-method],[data-cash],[data-cash-close],[data-cash-save],[data-choice],[data-opdel],[data-dismiss],[data-lc],[data-lc-all],[data-page],[data-go],[data-cur],[data-cat],[data-edit],[data-filter],[data-remove-cur],[data-csave],[data-cremove]');
   if(!t) return;
   const d = t.dataset;
   if(d.card){ form.cardId = d.card; renderForm(); return; }
-  if(d.potexp){
-    go('add'); form.kind = 'potExpense';
-    const cs = potCurs(); if(cs.length) form.currency = cs.sort((a,b)=>cash.pot.W[b].cost - cash.pot.W[a].cost)[0];
-    renderForm(); return;
-  }
+  if(d.potexp){ openPotExpense(); return; }
+  if(d.help){ showHelp(d.help); return; }
   if(d.potdep){ go('add'); form.kind = 'potDeposit'; renderForm(); return; }
   if(d.potout){ openCash('potout'); cashSheet.who = 'me'; renderCashSheet(); return; }
   if(d.potwho){ cashSheet.who = d.potwho; renderCashSheet(); return; }
@@ -2422,6 +2550,7 @@ document.addEventListener('click', e=>{
     else document.querySelectorAll('[data-lc]').forEach(b=>openCountries.add(b.dataset.lc));
     renderLedger(); return;
   }
+  if(d.page === 'add' && $('page-shared').classList.contains('on')){ openPotExpense(); return; }
   if(d.page) go(d.page);
   else if(d.go) go(d.go);
   else if(d.cur){ form.currency = d.cur; renderForm(); }
@@ -2461,7 +2590,6 @@ $('search').addEventListener('input', renderLedger);
 $('fCountry').addEventListener('input', onFormCountry);
 $('fCountry').addEventListener('change', onFormCountry);
 $('fOtherCur').addEventListener('change', e=>{ if(e.target.value){ form.currency = e.target.value; renderForm(); } });
-$('fPotWallet').addEventListener('change', updatePreview);
 $('fShareBox').addEventListener('input', e=>{ if(e.target.dataset.cust){ form.share.custom[e.target.dataset.cust] = e.target.value; updateShareHint(); } });
 $('fAmount').addEventListener('keydown', e=>{ if(e.key === 'Enter') saveExpense(); });
 $('saveBtn').addEventListener('click', saveExpense);
@@ -2525,6 +2653,7 @@ $('sAddPartner').addEventListener('click', ()=>{
   saveState(); renderAll(); toast(`${n} נוסף/ה`);
 });
 $('shareApp').addEventListener('click', shareApp);
+$('helpSearch').addEventListener('input', renderHelp);
 function download(name, text, type){
   const blob = new Blob([text], { type });
   const a = document.createElement('a');
